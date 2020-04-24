@@ -17,6 +17,8 @@ class SingleMovieViewController: UIViewController {
     
     let movie: MovieAPIListView
     
+    //let director: Director
+    
     var screenData = [MovieCellObject]()
     
     let indicator = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.large)
@@ -28,6 +30,7 @@ class SingleMovieViewController: UIViewController {
     init(movie: MovieAPIListView, networkManager: NetworkManager){
         self.movie = movie
         self.networkManager = networkManager
+       // self.director = director
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -46,6 +49,8 @@ class SingleMovieViewController: UIViewController {
         configureBackButton()
         
         backButton.addTarget(self, action: #selector(popToPreviousVC(sender:)), for: .touchUpInside)
+        self.screenData = createScreenData(movie: movie)
+        tableView.reloadData()
         
         setupSingleMovieTableViewConstraints()
         setupBackButtonConstraints()
@@ -77,23 +82,23 @@ class SingleMovieViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
     }
-    
+    /*
     func insertDirector(movieId: Int){
         networkManager.getMovieDirector(from: "https://api.themoviedb.org/3/movie/\(movieId)/credits", movieId: movieId){
             (director) in
             if let safeDirector = director {
-                self.screenData = self.createScreenData(movie: self.movie, director: safeDirector)
+                self.screenData = self.createScreenData(movie: self.movie)
                 self.tableView.reloadData()
             } else {}
         }
     }
-    
-    func createScreenData(movie: MovieAPIListView, director: Director) -> [MovieCellObject] {
+    */
+    func createScreenData(movie: MovieAPIListView) -> [MovieCellObject] {
         var screenData: [MovieCellObject] = []
         screenData.append(MovieCellObject(type: .image, data: movie.imageURL))
         screenData.append(MovieCellObject(type: .title, data: movie.title))
         //screenData.append(MovieCellObject(type: .genre, data: genre.))
-        screenData.append(MovieCellObject(type: .director, data: director.name))
+        //screenData.append(MovieCellObject(type: .director, data: director.name))
         screenData.append(MovieCellObject(type: .description, data: movie.description))
         return screenData
     }

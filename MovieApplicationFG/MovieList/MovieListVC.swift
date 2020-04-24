@@ -39,6 +39,7 @@ class MovieListVC: UIViewController {
     
     init(networkManager: NetworkManager){
         self.networkManager = networkManager
+        //self.director = Director
         super.init(nibName: nil, bundle: nil)
     }
     
