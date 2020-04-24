@@ -47,7 +47,36 @@ class NetworkManager {
             }.resume()
           
 }
-        
+        func getMovieDirector(from url: String, movieId: Int, _ completed: @escaping(Director?) -> Void){
+            guard let safeUrl = URL(string: url + APIkey) else{
+                DispatchQueue.main.async {
+                    completed(nil)
+                }
+                return
+            }
+            URLSession.shared.dataTask(with: safeUrl){ data, urlResponse, error in
+                guard let safeData = data, error == nil, urlResponse != nil else {
+                    DispatchQueue.main.async {
+                        completed(nil)
+                    }
+                    return
+                }
+                if let decodedObject: Response<[Crew]> = SerilizationManager.parseData(jsonData: safeData){
+                    let index = decodedObject.crew!.firstIndex(where: {
+                        (crewMember) in crewMember.job == "Director"
+                    })!
+                    DispatchQueue.main.async {
+                        completed(Director(name: decodedObject.crew![index].name, movieId: movieId))
+                    }
+                }
+                else {
+                    DispatchQueue.main.async {
+                        completed(nil)
+                    }
+                }
+
+            }.resume()
+        }
 }
 
 /*

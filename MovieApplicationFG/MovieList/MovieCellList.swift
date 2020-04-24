@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SnapKit
 
 class MovieCell: UITableViewCell {
 
@@ -60,6 +61,7 @@ class MovieCell: UITableViewCell {
     var movieYearLabel = UILabel()
     var watchedButton = UIButton()
     var favouritedButton = UIButton()
+    internal var id: Int = 0
     
     
     //containterView
@@ -67,6 +69,8 @@ class MovieCell: UITableViewCell {
         container.backgroundColor = .init(red: 0.11, green: 0.11, blue: 0.118, alpha: 1)
         container.layer.cornerRadius = 20
         container.clipsToBounds = true
+        container.translatesAutoresizingMaskIntoConstraints = false
+        
     }
     
     
@@ -82,6 +86,7 @@ class MovieCell: UITableViewCell {
     }
     
     func configureImageView() {
+        movieImageView.translatesAutoresizingMaskIntoConstraints = false
         movieImageView.layer.cornerRadius = 20
         movieImageView.clipsToBounds = true
         func setupGradientLayer() {
@@ -94,16 +99,19 @@ class MovieCell: UITableViewCell {
         setupGradientLayer()
     }
     func configureTitleLabel(){
+        movieTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         movieTitleLabel.numberOfLines = 0
         movieTitleLabel.font = UIFont(name: "Quicksand-Bold", size: 17)
         movieTitleLabel.textColor = .white
     }
     func configureGenreLabel(){
+        movieGenreLabel.translatesAutoresizingMaskIntoConstraints = false
         movieGenreLabel.numberOfLines = 0
         movieGenreLabel.font = UIFont(name: "Quicksand-Regular", size: 15)
         movieGenreLabel.textColor = .white
     }
     func configureYearLabel(){
+        movieYearLabel.translatesAutoresizingMaskIntoConstraints = false
         movieYearLabel.font = UIFont(name: "Quicksand-Medium", size: 21)
         movieYearLabel.textColor = .white
         movieYearLabel.adjustsFontSizeToFitWidth = true
@@ -126,49 +134,60 @@ class MovieCell: UITableViewCell {
     //MARK: Constraints
     
     func setImageConstraints() {
-        movieImageView.translatesAutoresizingMaskIntoConstraints = false
-        movieImageView.topAnchor.constraint(equalTo: container.topAnchor, constant: 0 ).isActive = true
-        movieImageView.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: 0).isActive = true
-        movieImageView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 0).isActive = true
-        movieImageView.widthAnchor.constraint(equalToConstant: 155).isActive = true
+        movieImageView.snp.makeConstraints{(maker) in
+            maker.top.equalToSuperview()
+            maker.bottom.equalToSuperview()
+            maker.leading.equalToSuperview()
+            maker.width.equalTo(155)
+            maker.height.equalTo(155)
+        }
     }
     func setTitleConstraints(){
-        movieTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        movieTitleLabel.topAnchor.constraint(equalTo: container.topAnchor, constant: 15).isActive = true
-        movieTitleLabel.leadingAnchor.constraint(equalTo: movieImageView.trailingAnchor, constant:20).isActive = true
-        movieTitleLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -15).isActive = true
+        movieTitleLabel.snp.makeConstraints{(maker) in
+            maker.top.equalToSuperview().inset(15)
+            maker.leading.equalTo(movieImageView.snp.trailing).inset(-15)
+            maker.trailing.equalToSuperview().inset(12)
+        }
     }
     func setGenreConstraints(){
-        movieGenreLabel.translatesAutoresizingMaskIntoConstraints = false
-        movieGenreLabel.topAnchor.constraint(equalTo: movieTitleLabel.bottomAnchor, constant: 0).isActive = true
-        movieGenreLabel.leadingAnchor.constraint(equalTo: movieImageView.trailingAnchor, constant:20).isActive = true
-        movieGenreLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -15).isActive = true
+        movieGenreLabel.snp.makeConstraints{(maker) in
+            maker.top.equalTo(movieTitleLabel.snp.bottom).inset(-1)
+            maker.leading.equalTo(movieImageView.snp.trailing).inset(-20)
+            maker.trailing.equalToSuperview().inset(-15)
+        }
     }
     func setYearConstraints(){
-        movieYearLabel.translatesAutoresizingMaskIntoConstraints = false
-        movieYearLabel.bottomAnchor.constraint(equalTo: movieImageView.bottomAnchor, constant: -4).isActive = true
-        movieYearLabel.leadingAnchor.constraint(equalTo: movieImageView.leadingAnchor, constant:55).isActive = true
-        movieYearLabel.trailingAnchor.constraint(equalTo: movieImageView.trailingAnchor, constant: -56).isActive = true
+        movieYearLabel.snp.makeConstraints{(maker) in
+            maker.top.equalTo(movieImageView.snp.top).inset(108)
+            maker.leading.equalTo(movieImageView.snp.leading).inset(55)
+        }
     }
     
     func setWatchedButtonConstraints(){
-        watchedButton.leadingAnchor.constraint(equalTo: movieImageView.trailingAnchor, constant: 90).isActive = true
-        watchedButton.topAnchor.constraint(equalTo: topAnchor, constant: 111).isActive = true
-        watchedButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -65).isActive = true
+        watchedButton.snp.makeConstraints{(maker) in
+            maker.top.equalToSuperview().inset(100)
+            maker.leading.equalTo(movieImageView.snp.trailing).inset(-90)
+            maker.trailing.equalToSuperview().inset(65)
+            maker.height.equalTo(35)
+        }
     }
     
     func setFavouritedButtonConstraints(){
-        favouritedButton.leadingAnchor.constraint(equalTo: movieImageView.trailingAnchor, constant: 140).isActive = true
-        favouritedButton.topAnchor.constraint(equalTo: topAnchor, constant: 111).isActive = true
-        favouritedButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -15).isActive = true
+        favouritedButton.snp.makeConstraints{(maker) in
+            maker.top.equalToSuperview().inset(100)
+            maker.leading.equalTo(movieImageView.snp.trailing).inset(-140)
+            maker.trailing.equalToSuperview().inset(15)
+            maker.height.equalTo(35)
+        }
     }
     
     func setContainerConstraints(){
-        container.translatesAutoresizingMaskIntoConstraints = false
-        container.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 16).isActive = true
-        container.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 0).isActive = true
-        container.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 15).isActive = true
-        container.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15).isActive = true
+        container.snp.makeConstraints {(maker) in
+            maker.top.equalToSuperview().inset(8)
+            maker.bottom.equalToSuperview().inset(8)
+            maker.leading.equalToSuperview().inset(15)
+            maker.trailing.equalToSuperview().inset(15)
+        }
     }
     
     
@@ -188,6 +207,7 @@ class MovieCell: UITableViewCell {
     //MARK: set function
     
     func set(movie: MovieAPIListView){
+        id = movie.id
         movieImageView.loadImage(with: movie.imageURL)
         movieTitleLabel.text = movie.title
         //movieGenreLabel.text = movie.

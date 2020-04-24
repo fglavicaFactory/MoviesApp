@@ -7,21 +7,9 @@
 //
 
 import UIKit
+import SnapKit
 
 class MovieListVC: UIViewController {
-    
-    
-    override func viewDidLoad() {
-        tableView.backgroundColor = .init(red: 0.221, green: 0.221, blue: 0.221, alpha: 1)
-        super.viewDidLoad()
-        view.backgroundColor = .init(red: 0.221, green: 0.221, blue: 0.221, alpha: 1)
-        configureTableView()
-        setupTableView()
-        getData()
-        
-    }
-    
-    
     
     var tableView = UITableView()
     
@@ -29,8 +17,23 @@ class MovieListVC: UIViewController {
     let indicator = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.large)
     
     var dataSource = [MovieAPIListView]()
+    
     private let networkManager: NetworkManager
     
+    // da me ne zezne string
+    struct Cells{
+        static let movieCell = "MovieCell"
+    }
+    
+    override func viewDidLoad() {
+        tableView.backgroundColor = .init(red: 0.221, green: 0.221, blue: 0.221, alpha: 1)
+        super.viewDidLoad()
+        view.backgroundColor = .init(red: 0.221, green: 0.221, blue: 0.221, alpha: 1)
+        configureTableView()
+        setupTableViewConstraints()
+        getData()
+        
+    }
     
     //nema sintetizirane inicijalizatore i zato trebamo networkManager init
     
@@ -43,23 +46,13 @@ class MovieListVC: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
-    
-    // da me ne zezne string
-    struct Cells{
-        static let movieCell = "MovieCell"
-    }
-    
-
-    
-    
-    
-    
     func configureTableView(){
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         setTableViewDelegates()
         tableView.register(MovieCell.self, forCellReuseIdentifier: Cells.movieCell)
-        tableView.rowHeight = 155
+        tableView.estimatedRowHeight = 180
+        tableView.rowHeight = UITableView.automaticDimension
 
     }
     
@@ -68,18 +61,7 @@ class MovieListVC: UIViewController {
         tableView.dataSource = self
     }
     
-    func setupTableView(){
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        tableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor).isActive = true
-        tableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor).isActive = true
-    }
-        
-    
-    
-    
-    
+   
     func getData(){
         indicator.startAnimating()
         networkManager.getData(from: "https://api.themoviedb.org/3/movie/now_playing") {   [unowned self](movieList) in
@@ -87,7 +69,18 @@ class MovieListVC: UIViewController {
             if let safeMovieList = movieList {
                 self.dataSource = self.createScreenData(from: safeMovieList)
                 self.tableView.reloadData()
-            }else {
+            }else {}
+        }
+    }
+    
+    func getGenres(){
+        indicator.startAnimating()
+        networkManager.getData(from: "https://api.themoviedb.org/3/genre/movie/list") { [unowned self](genres) in
+            self.indicator.stopAnimating()
+            if let safeGenreList = genres{
+                self.dataSource = self.createScreenData(from: safeGenreList)
+                self.tableView.reloadData()
+            }else{
                 
             }
         }
@@ -99,6 +92,14 @@ class MovieListVC: UIViewController {
             return MovieAPIListView(id: data.id, title: data.title, imageURL: data.posterPath, description: data.overview, year: year)
         }
     }
+    
+    //MARK: CONSTRAINTS
+    func setupTableViewConstraints(){
+        tableView.snp.makeConstraints{ (maker) in
+            maker.edges.equalTo(view.safeAreaLayoutGuide)
+        }
+    }
+    
 }
 
 
@@ -110,11 +111,6 @@ class MovieListVC: UIViewController {
 //MARK: tableView config
 
 extension MovieListVC: UITableViewDelegate, UITableViewDataSource{
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-    
-    
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return dataSource.count
@@ -127,6 +123,13 @@ extension MovieListVC: UITableViewDelegate, UITableViewDataSource{
         cell.set(movie: movie)
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let item = dataSource[indexPath.row]
+        let viewC = SingleMovieViewController(movie: item, networkManager: networkManager)
+        
+        self.navigationController?.pushViewController(viewC, animated: true)
     }
     
 
