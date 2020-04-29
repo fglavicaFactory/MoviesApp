@@ -11,6 +11,27 @@ import SnapKit
 
 class MovieCell: UITableViewCell {
 
+    var container = UIView()
+    
+    var movieImageView = UIImageView()
+    
+    var movieTitleLabel = UILabel()
+    
+    var movieGenreLabel = UILabel()
+    
+    var movieYearLabel = UILabel()
+    
+    var watchedButton = UIButton()
+    
+    var favouritedButton = UIButton()
+    
+    internal var id: Int = 0
+    
+    let gradientLayer = CAGradientLayer()
+    
+    weak var delegate: UserInteraction?
+    
+    
     //MARK: init
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -43,26 +64,15 @@ class MovieCell: UITableViewCell {
         setWatchedButtonConstraints()
         setFavouritedButtonConstraints()
         
-        watchedButton.addTarget(self, action: #selector(watchedButtonTapped), for: .touchUpInside)
-        favouritedButton.addTarget(self, action: #selector(favouritedButtonTapped), for: .touchUpInside)
+        watchedButton.addTarget(self, action: #selector(watchedButtonPressed), for: .touchUpInside)
+        favouritedButton.addTarget(self, action: #selector(favouritedButtonPressed), for: .touchUpInside)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
-    //variables
-    
-    var container = UIView()
-    var movieImageView = UIImageView()
-    var movieTitleLabel = UILabel()
-    var movieGenreLabel = UILabel()
-    var movieYearLabel = UILabel()
-    var watchedButton = UIButton()
-    var favouritedButton = UIButton()
-    internal var id: Int = 0
-    
+   
     
     //containterView
     func configureContainer(){
@@ -72,12 +82,10 @@ class MovieCell: UITableViewCell {
         container.translatesAutoresizingMaskIntoConstraints = false
         
     }
-    
-    
-    
+
     // gradient for imageView
     //MARK: Configuration
-    let gradientLayer = CAGradientLayer()
+    
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -103,6 +111,7 @@ class MovieCell: UITableViewCell {
         movieTitleLabel.numberOfLines = 0
         movieTitleLabel.font = UIFont(name: "Quicksand-Bold", size: 17)
         movieTitleLabel.textColor = .white
+        movieTitleLabel.adjustsFontSizeToFitWidth = true
     }
     func configureGenreLabel(){
         movieGenreLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -158,14 +167,14 @@ class MovieCell: UITableViewCell {
     }
     func setYearConstraints(){
         movieYearLabel.snp.makeConstraints{(maker) in
-            maker.top.equalTo(movieImageView.snp.top).inset(108)
+            maker.top.equalTo(movieImageView.snp.top).inset(125)
             maker.leading.equalTo(movieImageView.snp.leading).inset(55)
         }
     }
     
     func setWatchedButtonConstraints(){
         watchedButton.snp.makeConstraints{(maker) in
-            maker.top.equalToSuperview().inset(100)
+            maker.top.equalToSuperview().inset(111)
             maker.leading.equalTo(movieImageView.snp.trailing).inset(-90)
             maker.trailing.equalToSuperview().inset(65)
             maker.height.equalTo(35)
@@ -174,7 +183,7 @@ class MovieCell: UITableViewCell {
     
     func setFavouritedButtonConstraints(){
         favouritedButton.snp.makeConstraints{(maker) in
-            maker.top.equalToSuperview().inset(100)
+            maker.top.equalToSuperview().inset(111)
             maker.leading.equalTo(movieImageView.snp.trailing).inset(-140)
             maker.trailing.equalToSuperview().inset(15)
             maker.height.equalTo(35)
@@ -192,18 +201,6 @@ class MovieCell: UITableViewCell {
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     //MARK: set function
     
     func set(movie: MovieAPIListView){
@@ -212,43 +209,22 @@ class MovieCell: UITableViewCell {
         movieTitleLabel.text = movie.title
         //movieGenreLabel.text = movie.
         movieYearLabel.text = movie.year
+        watchedButton.isSelected = movie.watched
+        favouritedButton.isSelected = movie.favourite
     }
     
     // temporary clicked logic
-    @objc func watchedButtonTapped (){
-          if watchedButton.isSelected == true {
-            watchedButton.isSelected = false
-          }else {
-            watchedButton.isSelected = true
-          }
+    @objc func watchedButtonPressed(){
+        delegate?.watchedMoviePressed(with: id)
         }
     
-    @objc func favouritedButtonTapped(){
-          if favouritedButton.isSelected == true {
-            favouritedButton.isSelected = false
-          }else {
-            favouritedButton.isSelected = true
-          }
+    @objc func favouritedButtonPressed(){
+        delegate?.favouritedMoviePressed(with: id)
         }
-    
-    
-   
-    
-    
+
 }
-    extension UIImageView{
-       
-            func loadImage(with imageURL: String){
-                if let imageURL = URL(string: "https://image.tmdb.org/t/p/w1280"+imageURL) {
-                    DispatchQueue.global().async {
-                        let data = try? Data(contentsOf: imageURL)
-                        if let data = data {
-                            let safeImage = UIImage(data: data)
-                            DispatchQueue.main.async {[weak self] in
-                                self?.image = safeImage
-                            }
-                        }
-                    }
-                }
-        }
-    }
+
+
+
+
+

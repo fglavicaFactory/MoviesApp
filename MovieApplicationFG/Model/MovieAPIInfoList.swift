@@ -14,20 +14,22 @@ struct MovieAPIListView {
     let description: String
     let imageURL: String
     let year: String
-    //var watched: Bool
-    //var favourite: Bool
+    var watched: Bool
+    var favourite: Bool
+  //  let genres: [String]
 
     
     //Luka, ova init funkcija je da samo povezemo keyworde s json counterpartima? kad sam pitao decke nisu bas imali odgovor
     
-    init(id: Int, title: String, imageURL: String, description: String, year: String){
+    init(id: Int, title: String, imageURL: String, description: String, year: String, watched: Bool, favourite: Bool){
         self.id = id
         self.title = title
         self.description = description
         self.imageURL = imageURL
         self.year = year
-      //  self.watched = watched
-      //  self.favourite = favourite
+        self.watched = watched
+        self.favourite = favourite
+      //  self.genres = genres
 
 }
 }

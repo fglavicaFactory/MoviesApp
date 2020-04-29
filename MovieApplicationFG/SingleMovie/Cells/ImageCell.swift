@@ -12,10 +12,14 @@ import SnapKit
 class ImageCell: UITableViewCell {
     
     let movieImageView = UIImageView()
+    
     let watchedButton = UIButton()
+    
     let favouritedButton = UIButton()
     
     let gradientLayer = CAGradientLayer()
+    
+    weak var delegate: UserInteraction?
     
     internal var id: Int = 0
     
@@ -47,8 +51,8 @@ class ImageCell: UITableViewCell {
         setupWatchedButtonConstraints()
         setupFavouritedButtonConstraints()
         
-        watchedButton.addTarget(self, action: #selector(watchedButtonTapped), for: .touchUpInside)
-        favouritedButton.addTarget(self, action: #selector(favouritedButtonTapped), for: .touchUpInside)
+        watchedButton.addTarget(self, action: #selector(watchedButtonPressed), for: .touchUpInside)
+        favouritedButton.addTarget(self, action: #selector(favouritedButtonPressed), for: .touchUpInside)
     }
     
     required init?(coder: NSCoder) {
@@ -80,6 +84,8 @@ class ImageCell: UITableViewCell {
     func configureCell(image: String, movie: MovieAPIListView){
         id = movie.id
         movieImageView.loadImage(with: image)
+        watchedButton.isSelected = movie.watched
+        favouritedButton.isSelected = movie.favourite
     }
     //MARK: Constraints
     
@@ -111,19 +117,11 @@ class ImageCell: UITableViewCell {
 
 //MARK: button logic (temporary)
     extension ImageCell{
-        @objc func watchedButtonTapped (){
-            if watchedButton.isSelected == true {
-                watchedButton.isSelected = false
-            }else {
-                watchedButton.isSelected = true
-            }
+        @objc func watchedButtonPressed(){
+            delegate?.watchedMoviePressed(with: id)
         }
 
-        @objc func favouritedButtonTapped(){
-            if favouritedButton.isSelected == true {
-                favouritedButton.isSelected = false
-            }else {
-                favouritedButton.isSelected = true
-            }
+        @objc func favouritedButtonPressed(){
+            delegate?.favouritedMoviePressed(with: id)
         }
 }

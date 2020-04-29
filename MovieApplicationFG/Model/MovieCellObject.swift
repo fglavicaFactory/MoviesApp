@@ -16,7 +16,7 @@ struct MovieCellObject{
 enum MoviesDataTypeEnum {
     case image
     case title
-//    case genre
+// case genre
     case director
     case description
 }

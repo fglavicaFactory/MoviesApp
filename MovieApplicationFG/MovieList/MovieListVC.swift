@@ -54,6 +54,7 @@ class MovieListVC: UIViewController {
         tableView.register(MovieCell.self, forCellReuseIdentifier: Cells.movieCell)
         tableView.estimatedRowHeight = 180
         tableView.rowHeight = UITableView.automaticDimension
+        tableView.separatorStyle = .none
 
     }
     
@@ -90,7 +91,9 @@ class MovieListVC: UIViewController {
     private func createScreenData (from data: [MovieAPIInfo]) -> [MovieAPIListView]{
         return data.map { (data) -> MovieAPIListView in
             let year = DateUtils.getYearFromDate(stringDate: data.releaseDate)
-            return MovieAPIListView(id: data.id, title: data.title, imageURL: data.posterPath, description: data.overview, year: year)
+            let watched = DatabaseManager.isMovieWatched(with: data.id)
+            let favourite = DatabaseManager.isMovieFavourited(with: data.id)
+            return MovieAPIListView(id: data.id, title: data.title, imageURL: data.posterPath, description: data.overview, year: year, watched: watched, favourite: favourite)
         }
     }
     
@@ -122,6 +125,7 @@ extension MovieListVC: UITableViewDelegate, UITableViewDataSource{
         
         let movie = dataSource[indexPath.row]
         cell.set(movie: movie)
+        cell.delegate = self
         
         return cell
     }
@@ -129,9 +133,31 @@ extension MovieListVC: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let item = dataSource[indexPath.row]
         let viewC = SingleMovieViewController(movie: item, networkManager: networkManager)
+        viewC.delegate = self
         
         self.navigationController?.pushViewController(viewC, animated: true)
     }
     
 
+}
+
+extension MovieListVC: UserInteraction{
+    func watchedMoviePressed(with id: Int) {
+        guard let movie = dataSource.enumerated().first(where: {(movie) -> Bool in
+            return movie.element.id == id
+        }) else {return}
+        !movie.element.watched ? DatabaseManager.watchedMovie(with: movie.element.id) :
+            DatabaseManager.removeMovieFromWatched(with: movie.element.id)
+        dataSource[movie.offset].watched = !movie.element.watched
+        tableView.reloadRows(at: [IndexPath(row: movie.offset, section: 0)], with: .none)
+    }
+    func favouritedMoviePressed(with id: Int) {
+            guard let movie = dataSource.enumerated().first(where: { (movie) -> Bool in
+                return movie.element.id == id
+            }) else {return}
+            !movie.element.favourite ? DatabaseManager.favouritedMovie(with: movie.element.id) :
+                DatabaseManager.removeMovieFromFavourite(with: movie.element.id)
+            dataSource[movie.offset].favourite = !movie.element.favourite
+            tableView.reloadRows(at: [IndexPath(row: movie.offset, section: 0)], with: .none)
+    }
 }

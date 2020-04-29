@@ -12,6 +12,6 @@ import Foundation
 
 public struct Response<resultVar: Codable>: Codable {
     let results: resultVar?
-    //let genres: resultVar?
+    let genres: resultVar?
     let crew: resultVar?
 }

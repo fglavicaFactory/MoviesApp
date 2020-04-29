@@ -17,7 +17,7 @@ class SingleMovieViewController: UIViewController {
     
     let movie: MovieAPIListView
     
-    //let director: Director
+    let director: Director
     
     var screenData = [MovieCellObject]()
     
@@ -27,10 +27,12 @@ class SingleMovieViewController: UIViewController {
     
     private let networkManager: NetworkManager
     
+    weak var delegate: UserInteraction?
+    
     init(movie: MovieAPIListView, networkManager: NetworkManager){
         self.movie = movie
         self.networkManager = networkManager
-       // self.director = director
+        self.director =
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -49,11 +51,12 @@ class SingleMovieViewController: UIViewController {
         configureBackButton()
         
         backButton.addTarget(self, action: #selector(popToPreviousVC(sender:)), for: .touchUpInside)
-        self.screenData = createScreenData(movie: movie)
+        self.screenData = createScreenData(movie: movie, director: director)
         tableView.reloadData()
         
         setupSingleMovieTableViewConstraints()
         setupBackButtonConstraints()
+        insertDirector(movieId: movie.id)
 
     }
     
@@ -82,23 +85,23 @@ class SingleMovieViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
     }
-    /*
+    
     func insertDirector(movieId: Int){
         networkManager.getMovieDirector(from: "https://api.themoviedb.org/3/movie/\(movieId)/credits", movieId: movieId){
             (director) in
             if let safeDirector = director {
-                self.screenData = self.createScreenData(movie: self.movie)
+                self.screenData = self.createScreenData(movie: self.movie, director: safeDirector)
                 self.tableView.reloadData()
             } else {}
         }
     }
-    */
-    func createScreenData(movie: MovieAPIListView) -> [MovieCellObject] {
+    
+    func createScreenData(movie: MovieAPIListView, director: Director) -> [MovieCellObject] {
         var screenData: [MovieCellObject] = []
         screenData.append(MovieCellObject(type: .image, data: movie.imageURL))
         screenData.append(MovieCellObject(type: .title, data: movie.title))
         //screenData.append(MovieCellObject(type: .genre, data: genre.))
-        //screenData.append(MovieCellObject(type: .director, data: director.name))
+        screenData.append(MovieCellObject(type: .director, data: director.name))
         screenData.append(MovieCellObject(type: .description, data: movie.description))
         return screenData
     }
@@ -134,7 +137,9 @@ extension SingleMovieViewController: UITableViewDelegate, UITableViewDataSource 
         return screenData.count
     }
     
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let item = screenData[indexPath.row]
         
         switch item.type {
@@ -142,6 +147,7 @@ extension SingleMovieViewController: UITableViewDelegate, UITableViewDataSource 
         case .image:
             let cell = tableView.dequeueReusableCell(withIdentifier: "ImageCell", for: indexPath) as! ImageCell
             cell.configureCell(image: movie.imageURL, movie: movie)
+            cell.delegate = self
             
             return cell
             
@@ -169,5 +175,28 @@ extension SingleMovieViewController: UITableViewDelegate, UITableViewDataSource 
         }
         
         
+    }
+
+extension SingleMovieViewController: UserInteraction{
+    
+    
+    func watchedMoviePressed(with id: Int) {
+        guard let movie = dataSource.enumerated().first(where: {(movie) -> Bool in
+            return movie.element.id == id
+        }) else {return}
+        !movie.element.watched ? DatabaseManager.watchedMovie(with: movie.element.id) :
+        DatabaseManager.removeMovieFromWatched(with: movie.element.id)
+        dataSource[movie.offset].watched = !movie.element.watched
+        tableView.reloadRows(at: [IndexPath(row: movie.offset, section: 0)], with: .none)
+    }
+    func favouritedMoviePressed(with id: Int) {
+            guard let movie = dataSource.enumerated().first(where: { (movie) -> Bool in
+                return movie.element.id == id
+            }) else {return}
+            !movie.element.favourite ? DatabaseManager.favouritedMovie(with: movie.element.id) :
+            DatabaseManager.removeMovieFromFavourite(with: movie.element.id)
+            dataSource[movie.offset].favourite = !movie.element.favourite
+            tableView.reloadRows(at: [IndexPath(row: movie.offset, section: 0)], with: .none)
+        }
     }
 
